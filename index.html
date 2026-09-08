@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unfollower Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16202b;
+    --muted: #5b6572;
+    --box-bg: #fbfcfd;
+    --box-border: #dfe6ec;
+    --card-bg: #edeff1;
+    --accent: #5fc3ec;
+    --accent-dark: #45aad6;
+    --accent-soft: #e4f6fd;
+    --radius-lg: 28px;
+    --radius-md: 20px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--ink);
+    background: linear-gradient(150deg, #cdeaf8 0%, #dcf0fb 28%, #eef7fc 55%, #f7fbfe 100%);
+    background-attachment: fixed;
+  }
+
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  header.title-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  .logo-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    color: var(--ink);
+  }
+
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: clamp(34px, 6vw, 56px);
+    letter-spacing: -0.5px;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .instructions {
+    margin: 0 0 44px;
+    padding-left: 22px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.9;
+    max-width: 720px;
+  }
+
+  .instructions li::marker {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .lists-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 12px;
+  }
+
+  .list-col label {
+    display: block;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 16px;
+    letter-spacing: 0.2px;
+  }
+
+  textarea {
+    width: 100%;
+    height: 340px;
+    resize: vertical;
+    background: var(--box-bg);
+    border: 1.5px solid var(--box-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 22px;
+    font-family: 'Inter', monospace;
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    box-shadow: 0 1px 2px rgba(20, 30, 40, 0.03);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  textarea::placeholder { color: #9aa5af; }
+
+  textarea:focus {
+    outline: none;
+    border-color: var(--accent-dark);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+
+  .toolbar-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+    margin: 36px 0 8px;
+    flex-wrap: wrap;
+  }
+
+  .scan-btn {
+    background: linear-gradient(180deg, #6fcaee, var(--accent));
+    color: #fff;
+    border: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 19px;
+    padding: 16px 56px;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(95, 195, 236, 0.4);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  }
+
+  .scan-btn:hover { filter: brightness(1.03); transform: translateY(-1px); }
+  .scan-btn:active { transform: translateY(0); box-shadow: 0 4px 12px rgba(95, 195, 236, 0.4); }
+  .scan-btn:focus-visible { outline: 3px solid var(--accent-dark); outline-offset: 3px; }
+
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    padding: 8px;
+  }
+  .clear-btn:hover { color: var(--ink); }
+
+  .status-msg {
+    text-align: center;
+    color: #c0442f;
+    font-weight: 600;
+    font-size: 15px;
+    min-height: 22px;
+    margin: 4px 0 0;
+  }
+
+  .results-card {
+    margin-top: 40px;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    padding: 36px 40px 40px;
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .results-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .results-icon {
+    width: 34px;
+    height: 34px;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .results-title-group h2 {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  .count-badge {
+    background: var(--accent);
+    color: #fff;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .copy-btn {
+    background: #fff;
+    border: 1.5px solid var(--box-border);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .copy-btn:hover { border-color: var(--accent-dark); background: var(--accent-soft); }
+
+  .parse-note {
+    color: var(--muted);
+    font-size: 14px;
+    margin: 6px 0 26px;
+  }
+
+  .results-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 12px 24px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .results-list li {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--ink);
+    word-break: break-word;
+  }
+
+  .empty-good, .empty-state {
+    text-align: center;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 24px 8px 8px;
+    line-height: 1.7;
+  }
+
+  .empty-good strong { color: var(--ink); }
+
+  .results-card[hidden] { display: none; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13.5px;
+    margin-top: 56px;
+  }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 40px 18px 60px; }
+    .lists-grid { grid-template-columns: 1fr; gap: 24px; }
+    textarea { height: 220px; }
+    .results-card { padding: 28px 22px 32px; }
+    .results-list { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+    header.title-row { gap: 14px; }
+    .logo-icon { width: 42px; height: 42px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="title-row">
+    <svg class="logo-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="20" cy="20" r="15"/>
+      <line x1="31" y1="31" x2="43" y2="43"/>
+      <circle cx="20" cy="16.5" r="4"/>
+      <path d="M13 26c1.4-4 3.9-6 7-6s5.6 2 7 6"/>
+    </svg>
+    <h1>Unfollower Finder</h1>
+  </header>
+
+  <ol class="instructions">
+    <li>Open Instagram on your computer.</li>
+    <li>Copy and paste your Followers and Following lists by holding and selecting each list.</li>
+    <li>Paste each list into its corresponding box.</li>
+  </ol>
+
+  <div class="lists-grid">
+    <div class="list-col">
+      <label for="followersInput">Follower list</label>
+      <textarea id="followersInput" placeholder="Paste your followers list here…" spellcheck="false" aria-describedby="statusMsg"></textarea>
+    </div>
+    <div class="list-col">
+      <label for="followingInput">Following list</label>
+      <textarea id="followingInput" placeholder="Paste your following list here…" spellcheck="false" aria-describedby="statusMsg"></textarea>
+    </div>
+  </div>
+
+  <div class="toolbar-row">
+    <button class="scan-btn" id="scanBtn" type="button">Scan</button>
+    <button class="clear-btn" id="clearBtn" type="button">Clear lists</button>
+  </div>
+  <p class="status-msg" id="statusMsg" role="status"></p>
+
+  <section class="results-card" id="resultsCard" hidden>
+    <div class="results-header">
+      <div class="results-title-group">
+        <svg class="results-icon" viewBox="0 0 40 32" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="14" cy="9" r="6.5"/>
+          <path d="M3 29c0-7 4.9-12 11-12s11 5 11 12"/>
+          <line x1="27" y1="15" x2="37" y2="15"/>
+        </svg>
+        <h2>Not following you</h2>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span class="count-badge" id="countBadge">0</span>
+        <button class="copy-btn" id="copyBtn" type="button">Copy list</button>
+      </div>
+    </div>
+    <p class="parse-note" id="parseNote"></p>
+
+    <ul class="results-list" id="resultsList"></ul>
+    <div class="empty-good" id="emptyGood" hidden>
+      <strong>Everyone you follow follows you back. 🎉</strong><br>
+      No unfollowers found.
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function () {
+  const followersInput = document.getElementById('followersInput');
+  const followingInput = document.getElementById('followingInput');
+  const scanBtn = document.getElementById('scanBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const resultsCard = document.getElementById('resultsCard');
+  const resultsList = document.getElementById('resultsList');
+  const emptyGood = document.getElementById('emptyGood');
+  const countBadge = document.getElementById('countBadge');
+  const parseNote = document.getElementById('parseNote');
+
+  const USERNAME_RE = /^[a-zA-Z0-9._]{1,30}$/;
+  const SKIP_WORDS = new Set([
+    'follow', 'following', 'follow back', 'message', 'remove',
+    'requested', 'suggested for you', 'unfollow', 'verified'
+  ]);
+
+  // Extract Instagram usernames from a pasted follower/following list.
+  // Instagram's copied list repeats in pairs of lines per account:
+  //   line 1: username
+  //   line 2: display name (may be blank, or a lone ".")
+  // We walk the lines; whenever a line looks like a valid username we
+  // capture it and skip the very next line (its paired display name),
+  // whatever that line contains. Lines that don't look like a username
+  // (blank, ".", known UI labels, or contain spaces) are skipped without
+  // being treated as a username, so the pairing re-syncs on its own.
+  function extractUsernames(rawText) {
+    if (!rawText) return [];
+    const lines = rawText.split(/\r\n|\r|\n/).map(l => l.trim());
+    const found = [];
+    let i = 0;
+    while (i < lines.length) {
+      let line = lines[i];
+      if (line.startsWith('@')) line = line.slice(1);
+
+      const isBlankOrPeriod = line === '' || line === '.';
+      const isSkipWord = SKIP_WORDS.has(line.toLowerCase());
+
+      if (!isBlankOrPeriod && !isSkipWord && USERNAME_RE.test(line)) {
+        found.push(line.toLowerCase());
+        i++;                     // consumed the username line
+        if (i < lines.length) i++; // skip its paired display-name line
+      } else {
+        i++;                      // noise line, move on without pairing
+      }
+    }
+    return found;
+  }
+
+  function dedupe(arr) {
+    return Array.from(new Set(arr));
+  }
+
+  function setStatus(msg) {
+    statusMsg.textContent = msg || '';
+  }
+
+  function renderResults(notFollowingBack, followerCount, followingCount) {
+    resultsList.innerHTML = '';
+    countBadge.textContent = String(notFollowingBack.length);
+    parseNote.textContent =
+      'Checked ' + followingCount + ' accounts you follow against ' +
+      followerCount + ' followers.';
+
+    if (notFollowingBack.length === 0) {
+      emptyGood.hidden = false;
+      resultsList.hidden = true;
+    } else {
+      emptyGood.hidden = true;
+      resultsList.hidden = false;
+      const frag = document.createDocumentFragment();
+      notFollowingBack.forEach(function (username) {
+        const li = document.createElement('li');
+        li.textContent = '@' + username;
+        frag.appendChild(li);
+      });
+      resultsList.appendChild(frag);
+    }
+
+    resultsCard.hidden = false;
+    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  scanBtn.addEventListener('click', function () {
+    setStatus('');
+
+    const followers = dedupe(extractUsernames(followersInput.value));
+    const following = dedupe(extractUsernames(followingInput.value));
+
+    if (followingInput.value.trim() === '' && followersInput.value.trim() === '') {
+      setStatus('Paste your follower and following lists first.');
+      resultsCard.hidden = true;
+      return;
+    }
+    if (following.length === 0) {
+      setStatus('Couldn\u2019t find any usernames in the following list — check the paste and try again.');
+      resultsCard.hidden = true;
+      return;
+    }
+    if (followers.length === 0) {
+      setStatus('Couldn\u2019t find any usernames in the follower list — check the paste and try again.');
+      resultsCard.hidden = true;
+      return;
+    }
+
+    const followerSet = new Set(followers);
+    const notFollowingBack = following.filter(function (u) {
+      return !followerSet.has(u);
+    });
+
+    renderResults(notFollowingBack, followers.length, following.length);
+  });
+
+  clearBtn.addEventListener('click', function () {
+    followersInput.value = '';
+    followingInput.value = '';
+    setStatus('');
+    resultsCard.hidden = true;
+    followersInput.focus();
+  });
+
+  copyBtn.addEventListener('click', function () {
+    const items = Array.from(resultsList.querySelectorAll('li')).map(function (li) {
+      return li.textContent;
+    });
+    if (items.length === 0) return;
+    const text = items.join('\n');
+
+    const done = function () {
+      const original = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(function () { copyBtn.textContent = original; }, 1400);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () {
+        fallbackCopy(text, done);
+      });
+    } else {
+      fallbackCopy(text, done);
+    }
+  });
+
+  function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { /* no-op */ }
+    document.body.removeChild(ta);
+  }
+})();
+</script>
+
+</body>
+</html>
