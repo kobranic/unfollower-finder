@@ -368,38 +368,28 @@
     'follow', 'following', 'follow back', 'message', 'remove',
     'requested', 'suggested for you', 'unfollow', 'verified'
   ]);
-
-  // Extract Instagram usernames from a pasted follower/following list.
-  // Instagram's copied list repeats in pairs of lines per account:
-  //   line 1: username
-  //   line 2: display name (may be blank, or a lone ".")
-  // We walk the lines; whenever a line looks like a valid username we
-  // capture it and skip the very next line (its paired display name),
-  // whatever that line contains. Lines that don't look like a username
-  // (blank, ".", known UI labels, or contain spaces) are skipped without
-  // being treated as a username, so the pairing re-syncs on its own.
+  
   function extractUsernames(rawText) {
-    if (!rawText) return [];
-    const lines = rawText.split(/\r\n|\r|\n/).map(l => l.trim());
-    const found = [];
-    let i = 0;
-    while (i < lines.length) {
-      let line = lines[i];
-      if (line.startsWith('@')) line = line.slice(1);
+  if (!rawText) return [];
 
-      const isBlankOrPeriod = line === '' || line === '.';
-      const isSkipWord = SKIP_WORDS.has(line.toLowerCase());
+  const lines = rawText
+    .split(/\r\n|\r|\n/)
+    .map(line => line.trim());
 
-      if (!isBlankOrPeriod && !isSkipWord && USERNAME_RE.test(line)) {
-        found.push(line.toLowerCase());
-        i++;                     // consumed the username line
-        if (i < lines.length) i++; // skip its paired display-name line
-      } else {
-        i++;                      // noise line, move on without pairing
-      }
+  const found = [];
+
+  for (const line of lines) {
+    if (!line) continue;
+
+    if (SKIP_WORDS.has(line.toLowerCase())) continue;
+
+    if (USERNAME_RE.test(line)) {
+      found.push(line.toLowerCase());
     }
-    return found;
   }
+
+  return found;
+}
 
   function dedupe(arr) {
     return Array.from(new Set(arr));
